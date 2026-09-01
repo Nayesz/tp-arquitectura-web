@@ -30,10 +30,10 @@ Este servidor está implementado con el módulo nativo http de Node.js. Escucha 
 | 200  OK  |  Cuando el servidor termina de recibir el cuerpo de la solicitud (evento "end").  | 'text/plain': `Cantidad de bytes recibidos: ${totalBytes} |
   
 - Ejemplo de solicitud (usando curl):
-´´´
+```
 curl -X POST http://localhost:3000/archivo \
 --data-binary @algun-archivo.bin 
-´´´
+```
 
 ### 3.  Ruta no encontrada (manejo por defecto)
 - Ruta: cualquier ruta distinta a "/" y "/archivo"
@@ -44,5 +44,5 @@ curl -X POST http://localhost:3000/archivo \
 
 | Código    |  Cuándo sucede   |Content-Type| 
 | --------- | --------- |-----| 
-| 404  Not Found  | Para cualquier solicitud cuya combinación de método y ruta no esté contemplada explícita  | 'text/plain' : 'Ruta no encontrada.' |
+| 404  Not Found  | Para cualquier solicitud cuya combinación de método y ruta no esté contemplada explícitamente  | 'text/plain' : 'Ruta no encontrada.' |
   
