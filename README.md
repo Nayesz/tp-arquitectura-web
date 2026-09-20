@@ -1,4 +1,4 @@
-# Documentación de la API — Tablero tipo Trello
+# Documentación de la API — Tablero
 
 ## Descripción general del backend
 
@@ -10,8 +10,6 @@ agrupar el trabajo en tableros, cada uno dividido en listas (columnas, por ejemp
 La API expone endpoints REST para crear y administrar tableros, listas y tarjetas, mover
 tarjetas entre listas, y obtener un reporte estadístico del estado de cada tablero (cantidad de
 tarjetas por lista y tarjetas vencidas)
-
-
 
 
 ## Documentación de cada endpoint
