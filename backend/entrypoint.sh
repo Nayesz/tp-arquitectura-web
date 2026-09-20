@@ -1,0 +1,1 @@
+node ./swagger-gen.js && node server.js

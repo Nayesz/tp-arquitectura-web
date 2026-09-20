@@ -1,0 +1,30 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: mongo-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+
+  backend:
+    build: ./backend
+    container_name: tablero-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - MONGO_URI=mongodb://mongo:27017/trello
+    depends_on:
+      - mongo
+  frontend:
+    build: ./frontend
+    container_name: tablero-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data:

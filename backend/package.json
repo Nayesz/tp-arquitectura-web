@@ -1,0 +1,26 @@
+{
+  "name": "trello-board-backend",
+  "version": "1.0.0",
+  "description": "Backend REST API para un tablero tipo Trello (Kanban) - Trabajo Práctico Integrador",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "swagger": "node ./src/config/swagger-gen.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.5.0",
+    "swagger-autogen": "^2.23.7",
+    "swagger-jsdoc": "^6.3.0",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
