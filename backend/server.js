@@ -3,7 +3,6 @@ const cors = require('cors');
 /** Swagger */
 const swaggerSpec = require('./src/config/swagger');
 const swaggerUi = require('swagger-ui-express');
-// const swaggerDocument = require('./src/config/swagger-output.json'); -> TODO: test de docu autogenerada pero esta fea, decidir que se hace
 /** bbdd */
 const { connectDB } = require('./src/db/connection');
 const { seedIfEmpty } = require('./src/data/seed');
