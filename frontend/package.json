@@ -1,10 +1,10 @@
 {
-  "name": "trello-board-frontend",
+  "name": "tablero-frontend",
   "private": true,
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview"
   },

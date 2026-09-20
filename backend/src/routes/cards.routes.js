@@ -5,7 +5,26 @@ const { isValidObjectId } = require('../utils/isValidObjectId');
 
 const router = Router();
 
-// GET /api/cards/:id
+/**
+ * @swagger
+ * /cards/{id}:
+ *   get:
+ *     summary: Obtiene el detalle de una tarjeta
+ *     tags: [Cards]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Tarjeta encontrada
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Card' }
+ *       404:
+ *         description: No existe ninguna tarjeta con ese id
+ */
 router.get('/:id', async (req, res, next) => {
   try {
     if (!isValidObjectId(req.params.id)) {
@@ -24,7 +43,40 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
-// PUT /api/cards/:id
+/**
+ * @swagger
+ * /cards/{id}:
+ *   put:
+ *     summary: Actualiza los datos de una tarjeta
+ *     tags: [Cards] 
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title: { type: string }
+ *               description: { type: string }
+ *               dueDate: { type: string, format: date }
+ *               labels:
+ *                 type: array
+ *                 items: { type: string }
+ *     responses:
+ *       200:
+ *         description: Tarjeta actualizada
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Card' }
+ *       400:
+ *         description: El body no cumple el formato esperado
+ *       404:
+ *         description: No existe ninguna tarjeta con ese id
+ */
 router.put('/:id', async (req, res, next) => {
   try {
     if (!isValidObjectId(req.params.id)) {
@@ -59,7 +111,38 @@ router.put('/:id', async (req, res, next) => {
   }
 });
 
-// PATCH /api/cards/:id/move
+/**
+ * @swagger
+ * /cards/{id}/move:
+ *   patch:
+ *     summary: Mueve una tarjeta a otra lista y/o cambia su posición
+ *     tags: [Cards]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [targetListId, position]
+ *             properties:
+ *               targetListId: { type: string }
+ *               position: { type: number, example: 1 }
+ *     responses:
+ *       200:
+ *         description: Tarjeta movida correctamente
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Card' }
+ *       400:
+ *         description: Faltan "targetListId" o "position", o son inválidos
+ *       404:
+ *         description: No existe la tarjeta o la lista destino
+ */
 router.patch('/:id/move', async (req, res, next) => {
   try {
     if (!isValidObjectId(req.params.id)) {
@@ -98,7 +181,23 @@ router.patch('/:id/move', async (req, res, next) => {
   }
 });
 
-// DELETE /api/cards/:id
+/**
+ * @swagger
+ * /cards/{id}:
+ *   delete:
+ *     summary: Elimina una tarjeta
+ *     tags: [Cards]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       204:
+ *         description: Tarjeta eliminada correctamente
+ *       404:
+ *         description: No existe ninguna tarjeta con ese id
+ */
 router.delete('/:id', async (req, res, next) => {
   try {
     if (!isValidObjectId(req.params.id)) {

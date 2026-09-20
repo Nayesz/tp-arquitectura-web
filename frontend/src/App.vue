@@ -1,14 +1,61 @@
+<template>
+  <header class="app-header">
+    <div>
+          <h1>{{ view === 'workspace' && board ? board.name : 'Tablero' }}</h1>
+          <div v-if="showDescription">{{ description }}</div>
+
+    </div>
+    <div class="tabs">
+      <template v-if="view === 'workspace'">
+        <button :class="{ active: activeTab === 'board' }" @click="switchTab('board')">Tablero</button>
+        <button :class="{ active: activeTab === 'report' }" @click="switchTab('report')">Reporte</button>
+        <button class="header-btn" @click="changeBoard">Cambiar tablero</button>
+      </template>
+    </div>
+  </header>
+
+  <main class="app-body">
+    <div v-if="errorMsg" class="error-banner">{{ errorMsg }}</div>
+    <div v-if="view === 'loading'" class="loading">Cargando…</div>
+
+    <BoardSelector v-else-if="view === 'selector'" :boards="allBoards" @select="selectBoard" @create="createBoard" />
+
+    <template v-else-if="view === 'workspace'">
+
+      <section v-if="activeTab === 'board'" class="board">
+            <ListColumn v-for="list in lists" :key="list.id" :list="list" :cards="cardsByList[list.id] || []"
+              :all-lists="lists" @add-card="openCreateModal" @edit-card="openEditModal" @delete-card="deleteCard"
+              @move-card="moveCard" />
+            <AddListColumn @create="addList" />
+      </section>
+
+      <section v-else-if="activeTab === 'report'">
+        <div v-if="!report" class="loading">Cargando reporte…</div>
+        <ReportView v-else :report="report" />
+      </section>
+    </template>
+  </main>
+
+  <CardFormModal v-if="modalOpen" :card="editingCard" :list-name="activeListForModal?.name || ''" @save="saveCard"
+    @close="closeModal" />
+</template>
+
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted,computed } from 'vue';
 import { api } from './api';
+import BoardSelector from './components/BoardSelector.vue';
 import ListColumn from './components/ListColumn.vue';
+import AddListColumn from './components/AddListColumn.vue';
 import CardFormModal from './components/CardFormModal.vue';
 import ReportView from './components/ReportView.vue';
 
+const LAST_BOARD_KEY = 'trello-last-board-id';
+
+const view = ref('loading'); // 'loading' | 'selector' | 'workspace'
 const activeTab = ref('board'); // 'board' | 'report'
-const loading = ref(true);
 const errorMsg = ref('');
 
+const allBoards = ref([]);
 const board = ref(null);
 const lists = ref([]);
 const cardsByList = ref({}); // { [listId]: Card[] }
@@ -17,28 +64,57 @@ const report = ref(null);
 const modalOpen = ref(false);
 const editingCard = ref(null); // null = creando
 const activeListForModal = ref(null);
+const description = ref(null);
 
-async function loadBoard() {
-  loading.value = true;
+const showDescription= computed(()=> {
+  return view.value != 'selector'
+})
+
+async function loadBoardsList() {
   errorMsg.value = '';
   try {
-    const boards = await api.getBoards();
-    if (!boards.length) {
-      errorMsg.value = 'No hay tableros disponibles.';
-      return;
-    }
-    board.value = boards[0];
-    lists.value = await api.getLists(board.value.id);
+    allBoards.value = await api.getBoards();
+  } catch (err) {
+    errorMsg.value = err.message;
+  }
+}
 
+async function loadWorkspace(selectedBoard) {
+  errorMsg.value = '';
+  try {
+    board.value = selectedBoard;
+    lists.value = await api.getLists(selectedBoard.id);
+    description.value = selectedBoard.description
     const entries = await Promise.all(
       lists.value.map(async (list) => [list.id, await api.getCards(list.id)])
     );
     cardsByList.value = Object.fromEntries(entries);
+
+    localStorage.setItem(LAST_BOARD_KEY, selectedBoard.id);
+    activeTab.value = 'board';
+    view.value = 'workspace';
   } catch (err) {
     errorMsg.value = err.message;
-  } finally {
-    loading.value = false;
   }
+}
+
+function selectBoard(selectedBoard) {
+  loadWorkspace(selectedBoard);
+}
+
+async function createBoard(payload) {
+  errorMsg.value = '';
+  try {
+    const created = await api.createBoard(payload);
+    allBoards.value.push(created);
+    await loadWorkspace(created);
+  } catch (err) {
+    errorMsg.value = err.message;
+  }
+}
+
+function changeBoard() {
+  view.value = 'selector';
 }
 
 async function loadReport() {
@@ -119,50 +195,28 @@ async function moveCard(card, targetListId) {
   }
 }
 
-onMounted(loadBoard);
+async function addList(name) {
+  if (!board.value) return;
+  errorMsg.value = '';
+  try {
+    const list = await api.createList(board.value.id, { name });
+    lists.value.push(list);
+    cardsByList.value[list.id] = [];
+  } catch (err) {
+    errorMsg.value = err.message;
+  }
+}
+
+onMounted(async () => {
+  await loadBoardsList();
+
+  const lastId = localStorage.getItem(LAST_BOARD_KEY);
+  const lastBoard = lastId ? allBoards.value.find((b) => b.id === lastId) : null;
+
+  if (lastBoard) {
+    await loadWorkspace(lastBoard);
+  } else {
+    view.value = 'selector';
+  }
+});
 </script>
-
-<template>
-  <header class="app-header">
-    <h1>{{ board ? board.name : 'Tablero Kanban' }}</h1>
-    <div class="tabs">
-      <button :class="{ active: activeTab === 'board' }" @click="switchTab('board')">Tablero</button>
-      <button :class="{ active: activeTab === 'report' }" @click="switchTab('report')">Reporte</button>
-    </div>
-  </header>
-
-  <main class="app-body">
-    <div v-if="errorMsg" class="error-banner">{{ errorMsg }}</div>
-
-    <div v-if="loading" class="loading">Cargando tablero…</div>
-
-    <template v-else>
-      <section v-if="activeTab === 'board'" class="board">
-        <ListColumn
-          v-for="list in lists"
-          :key="list.id"
-          :list="list"
-          :cards="cardsByList[list.id] || []"
-          :all-lists="lists"
-          @add-card="openCreateModal"
-          @edit-card="openEditModal"
-          @delete-card="deleteCard"
-          @move-card="moveCard"
-        />
-      </section>
-
-      <section v-else-if="activeTab === 'report'">
-        <div v-if="!report" class="loading">Cargando reporte…</div>
-        <ReportView v-else :report="report" />
-      </section>
-    </template>
-  </main>
-
-  <CardFormModal
-    v-if="modalOpen"
-    :card="editingCard"
-    :list-name="activeListForModal?.name || ''"
-    @save="saveCard"
-    @close="closeModal"
-  />
-</template>

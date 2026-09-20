@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/trello';
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/tablero';
 const MAX_RETRIES = 10;
 const RETRY_DELAY_MS = 3000;
 

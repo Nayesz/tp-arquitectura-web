@@ -10,6 +10,7 @@ const router = Router();
  * /boards:
  *   get:
  *     summary: Lista todos los tableros
+ *     tags: [Board]
  *     description: Devuelve el arreglo completo de tableros existentes. Si no hay ninguno, devuelve un arreglo vacío.
  *     responses:
  *       200:
@@ -35,6 +36,7 @@ router.get('/', async (req, res, next) => {
  * /boards:
  *   post:
  *     summary: Crea un nuevo tablero
+ *     tags: [Board]
  *     requestBody:
  *       required: true
  *       content:
@@ -88,7 +90,36 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
-// PUT /api/boards/:id
+/**
+ * @swagger
+ * /boards/{id}:
+ *   put:
+ *     summary: Actualiza el nombre y/o la descripción de un tablero
+ *     tags: [Board]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name: { type: string, example: "Proyecto TP Integrador v2" }
+ *               description: { type: string }
+ *     responses:
+ *       200:
+ *         description: Tablero actualizado
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Board' }
+ *       400:
+ *         description: El body no cumple el formato esperado
+ *       404:
+ *         description: No existe ningún tablero con ese id
+ */
 router.put('/:id', async (req, res, next) => {
   try {
     if (!isValidObjectId(req.params.id)) {
@@ -117,7 +148,23 @@ router.put('/:id', async (req, res, next) => {
   }
 });
 
-// DELETE /api/boards/:id
+/**
+ * @swagger
+ * /boards/{id}:
+ *   delete:
+ *     summary: Elimina un tablero junto con sus listas y tarjetas
+ *     tags: [Board]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       204:
+ *         description: Tablero eliminado correctamente (sin contenido)
+ *       404:
+ *         description: No existe ningún tablero con ese id
+ */
 router.delete('/:id', async (req, res, next) => {
   try {
     if (!isValidObjectId(req.params.id)) {
@@ -141,7 +188,28 @@ router.delete('/:id', async (req, res, next) => {
   }
 });
 
-// GET /api/boards/:boardId/lists
+/**
+ * @swagger
+ * /boards/{boardId}/lists:
+ *   get:
+ *     summary: Lista las columnas de un tablero
+ *     tags: [Board]
+ *     parameters:
+ *       - in: path
+ *         name: boardId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Arreglo de listas del tablero (puede estar vacío)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items: { $ref: '#/components/schemas/List' }
+ *       404:
+ *         description: No existe ningún tablero con ese boardId
+ */
 router.get('/:boardId/lists', async (req, res, next) => {
   try {
     if (!isValidObjectId(req.params.boardId)) {
@@ -161,7 +229,38 @@ router.get('/:boardId/lists', async (req, res, next) => {
   }
 });
 
-// POST /api/boards/:boardId/lists
+/**
+ * @swagger
+ * /boards/{boardId}/lists:
+ *   post:
+ *     summary: Crea una nueva lista dentro de un tablero
+ *     tags: [Board]
+ *     parameters:
+ *       - in: path
+ *         name: boardId
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name]
+ *             properties:
+ *               name: { type: string, example: "En progreso" }
+ *               position: { type: number, example: 2 }
+ *     responses:
+ *       201:
+ *         description: Lista creada correctamente
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/List' }
+ *       400:
+ *         description: Falta el campo "name" o el body es inválido
+ *       404:
+ *         description: No existe ningún tablero con ese boardId
+ */
 router.post('/:boardId/lists', async (req, res, next) => {
   try {
     if (!isValidObjectId(req.params.boardId)) {
@@ -194,7 +293,40 @@ router.post('/:boardId/lists', async (req, res, next) => {
   }
 });
 
-// GET /api/boards/:boardId/report
+/**
+ * @swagger
+ * /boards/{boardId}/report:
+ *   get:
+ *     summary: Reporte de un tablero (tarjetas por lista, total y vencidas)
+ *     tags: [Board]
+ *     parameters:
+ *       - in: path
+ *         name: boardId
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200:
+ *         description: Reporte generado correctamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 boardId: { type: string }
+ *                 boardName: { type: string }
+ *                 cardsPerList:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       listId: { type: string }
+ *                       listName: { type: string }
+ *                       count: { type: number }
+ *                 totalCards: { type: number }
+ *                 overdueCards: { type: number }
+ *       404:
+ *         description: No existe ningún tablero con ese boardId
+ */
 router.get('/:boardId/report', async (req, res, next) => {
   try {
     if (!isValidObjectId(req.params.boardId)) {

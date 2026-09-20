@@ -1,7 +1,7 @@
 {
-  "name": "trello-board-backend",
+  "name": "tablero-backend",
   "version": "1.0.0",
-  "description": "Backend REST API para un tablero tipo Trello (Kanban) - Trabajo Práctico Integrador",
+  "description": "Backend REST API para un tablero de tareas - Trabajo Práctico Integrador",
   "main": "server.js",
   "type": "commonjs",
   "scripts": {

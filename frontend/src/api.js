@@ -23,7 +23,8 @@ export const api = {
   getBoards: () => request('/boards'),
   getBoard: (id) => request(`/boards/${id}`),
   getReport: (boardId) => request(`/boards/${boardId}/report`),
-
+  createBoard: (payload) => 
+    request(`/boards`, { method: 'POST', body: JSON.stringify(payload) }),
   // Lists
   getLists: (boardId) => request(`/boards/${boardId}/lists`),
   createList: (boardId, payload) =>
